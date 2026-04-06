@@ -3,444 +3,929 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Splat Forge</title>
+<title>Splat LOD Forge</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script type="importmap">
 {
   "imports": {
     "three": "https://cdn.jsdelivr.net/npm/three@0.178.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.178.0/examples/jsm/",
-    "@sparkjsdev/spark": "https://sparkjs.dev/releases/spark/0.1.10/spark.module.js"
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.178.0/examples/jsm/"
   }
 }
 </script>
 <style>
 :root {
-  --bg:     #0b0e14;
-  --bg2:    #0f1219;
-  --panel:  #141820;
-  --panel2: #191e28;
-  --bdr:    #1e2535;
-  --bdr2:   #252d3d;
-  --acc:    #00c8d7;
-  --grn:    #00e676;
-  --grn2:   #00c853;
-  --red:    #ff1744;
-  --t0:     #3a4c60;
-  --t1:     #6a88a0;
-  --t2:     #b0c8d8;
-  --t3:     #d0e4f0;
-  --mono:   'Share Tech Mono', monospace;
+  --bg:    #08090d;
+  --bg2:   #0c0e14;
+  --panel: #10131a;
+  --p2:    #141820;
+  --bdr:   #1a2030;
+  --bdr2:  #202838;
+  --acc:   #00d4e8;
+  --acc2:  #00b8c8;
+  --grn:   #00e676;
+  --grn2:  #00c853;
+  --ylw:   #ffc107;
+  --red:   #ff3d5a;
+  --pur:   #7c4dff;
+  --t0:    #2e3d52;
+  --t1:    #5a7898;
+  --t2:    #8aaac0;
+  --t3:    #c0d8e8;
+  --mono:  'Share Tech Mono', monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:var(--mono);color:var(--t1);font-size:12px}
 
-/* TITLE BAR */
-#titlebar{height:40px;background:#080b10;border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0}
-.t-icon{width:20px;height:20px;border:1px solid var(--acc);display:flex;align-items:center;justify-content:center;color:var(--acc);font-size:10px;flex-shrink:0}
-.t-name{font-size:14px;color:var(--t3);letter-spacing:.06em}
-.t-sub{font-size:10px;color:var(--t0);letter-spacing:.14em;display:flex;gap:10px}
+/* TITLEBAR */
+#tb{height:38px;background:#060709;border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0}
+.t-ico{width:18px;height:18px;border:1px solid var(--acc);display:flex;align-items:center;justify-content:center;color:var(--acc);font-size:9px}
+.t-name{font-size:13px;color:var(--t3);letter-spacing:.06em}
+.t-sub{font-size:9px;color:var(--t0);letter-spacing:.14em;display:flex;gap:8px}
 .t-sub b{color:var(--bdr2)}
-.t-right{margin-left:auto;display:flex;gap:6px;align-items:center}
-.t-btn{height:22px;padding:0 10px;border:1px solid var(--bdr2);background:transparent;color:var(--t1);font-family:var(--mono);font-size:10px;letter-spacing:.08em;cursor:pointer;transition:all .15s}
+.t-r{margin-left:auto;display:flex;gap:6px;align-items:center}
+.t-btn{height:20px;padding:0 10px;border:1px solid var(--bdr2);background:transparent;color:var(--t1);font-family:var(--mono);font-size:9px;letter-spacing:.08em;cursor:pointer;transition:all .15s}
 .t-btn:hover{border-color:var(--acc);color:var(--acc)}
-.sysbadge{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t0);letter-spacing:.1em;padding-left:8px;border-left:1px solid var(--bdr)}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--t0)}
+.sysbadge{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--t0);letter-spacing:.1em;padding-left:8px;border-left:1px solid var(--bdr)}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--t0);flex-shrink:0}
 .dot.ok{background:var(--grn);box-shadow:0 0 5px var(--grn)}
-.dot.ld{background:var(--acc);box-shadow:0 0 5px var(--acc);animation:bl .7s infinite}
-@keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}
+.dot.ld{background:var(--acc);box-shadow:0 0 5px var(--acc);animation:bl .6s infinite}
+.dot.wr{background:var(--ylw);box-shadow:0 0 5px var(--ylw)}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.15}}
 
-/* STEP BAR */
-#stepbar{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--bdr);flex-shrink:0}
-.step{display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--bdr);background:var(--bg2);cursor:pointer;transition:background .15s;position:relative}
+/* STEPBAR */
+#sb{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--bdr);flex-shrink:0}
+.step{display:flex;align-items:center;gap:7px;padding:7px 10px;border-right:1px solid var(--bdr);background:var(--bg2);cursor:pointer;transition:background .15s;position:relative;overflow:hidden}
 .step:last-child{border-right:none}
-.step:hover{background:var(--panel)}
-.step.on{background:var(--panel2)}
+.step.on{background:var(--panel)}
 .step.on::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--acc)}
-.step.done .sn{border-color:var(--grn);color:var(--grn);background:rgba(0,230,118,.08)}
-.sn{width:20px;height:20px;border:1px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--t0);flex-shrink:0;transition:all .2s}
-.step.on .sn{border-color:var(--acc);color:var(--acc);background:rgba(0,200,215,.08)}
-.st{font-size:12px;color:var(--t2);letter-spacing:.03em}
-.ss{font-size:10px;color:var(--t0);margin-top:1px}
+.step.done .sn{border-color:var(--grn);color:var(--grn);background:rgba(0,230,118,.07)}
+.sn{width:18px;height:18px;border:1px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--t0);flex-shrink:0;transition:all .2s}
+.step.on .sn{border-color:var(--acc);color:var(--acc);background:rgba(0,212,232,.07)}
+.st{font-size:11px;color:var(--t2)}
+.ss{font-size:9px;color:var(--t0);margin-top:1px}
 
 /* LAYOUT */
-#main{display:flex;height:calc(100vh - 40px - 50px);overflow:hidden}
+#main{display:flex;height:calc(100vh - 38px - 46px);overflow:hidden}
 
 /* SIDEBAR */
-#sidebar{width:220px;flex-shrink:0;border-right:1px solid var(--bdr);background:var(--bg2);display:flex;flex-direction:column;overflow:hidden}
-.sb-hdr{padding:7px 10px;background:var(--panel);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:5px}
-.sb-sq{width:8px;height:8px;border:1px solid var(--bdr2);background:var(--bdr2);flex-shrink:0}
-.sb-ttl{font-size:10px;color:var(--t1);letter-spacing:.12em}
-.fcount{font-size:10px;color:var(--grn);padding:7px 10px;border-bottom:1px solid var(--bdr)}
-.sb-btn{display:flex;align-items:center;justify-content:center;gap:6px;height:28px;border:1px solid var(--bdr2);background:var(--panel);color:var(--t1);font-family:var(--mono);font-size:10px;letter-spacing:.08em;cursor:pointer;transition:all .15s;margin:6px 8px 0}
+#side{width:210px;flex-shrink:0;border-right:1px solid var(--bdr);background:var(--bg2);display:flex;flex-direction:column;overflow:hidden}
+.sh{padding:6px 10px;background:var(--panel);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:5px;flex-shrink:0}
+.sh-sq{width:7px;height:7px;border:1px solid var(--bdr2);background:var(--bdr2);flex-shrink:0}
+.sh-t{font-size:9px;color:var(--t1);letter-spacing:.12em}
+.sb-btn{display:flex;align-items:center;justify-content:center;gap:5px;height:26px;border:1px solid var(--bdr2);background:var(--panel);color:var(--t1);font-family:var(--mono);font-size:9px;letter-spacing:.08em;cursor:pointer;transition:all .15s;margin:6px 8px 0}
 .sb-btn:hover{border-color:var(--acc);color:var(--acc)}
-.sb-btn.p{border-color:rgba(0,200,215,.3);color:var(--acc);background:rgba(0,200,215,.04)}
-.sb-row{display:flex;gap:4px;padding:4px 8px}
+.sb-btn.p{border-color:rgba(0,212,232,.3);color:var(--acc);background:rgba(0,212,232,.04)}
+.sb-btn.g{border-color:rgba(0,230,118,.3);color:var(--grn);background:rgba(0,230,118,.04)}
+.sb-btn.g:hover{border-color:var(--grn);background:rgba(0,230,118,.08)}
+.sb-btn:disabled{opacity:.35;cursor:default;border-color:var(--bdr2);color:var(--t0)}
+.sb-row{display:flex;gap:3px;padding:3px 8px}
 .sb-row .sb-btn{margin:0;flex:1;font-size:9px}
-.sortbar{display:flex;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);flex-shrink:0}
-.sotab{flex:1;text-align:center;font-size:9px;color:var(--t0);letter-spacing:.1em;padding:4px 0;cursor:pointer;border-right:1px solid var(--bdr)}
-.sotab:last-child{border-right:none}
-.sotab.on{color:var(--acc)}
-.flist{flex:1;overflow-y:auto;padding:3px 0;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent}
-.fi{display:flex;align-items:center;gap:7px;padding:4px 10px;cursor:pointer;transition:background .1s;border-left:2px solid transparent}
-.fi:hover{background:var(--panel)}
-.fi.on{border-left-color:var(--acc);background:var(--panel)}
-.fi-d{width:5px;height:5px;border-radius:50%;background:var(--bdr2);flex-shrink:0}
-.fi-d.ok{background:var(--grn);box-shadow:0 0 4px var(--grn2)}
-.fi-n{font-size:10px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* WORKER STATUS */
+#wstatus{margin:6px 8px;padding:6px 8px;border:1px solid var(--bdr2);background:var(--bg);font-size:9px;color:var(--t0);line-height:1.7;flex-shrink:0}
+.ws-row{display:flex;justify-content:space-between}
+.ws-key{color:var(--t0)}
+.ws-val{color:var(--t2)}
+.ws-val.g{color:var(--grn)}
+.ws-val.a{color:var(--acc)}
+.ws-val.y{color:var(--ylw)}
+
+/* LOD CONFIG */
+.lod-cfg{overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent}
+.lc-hdr{font-size:9px;letter-spacing:.18em;color:var(--t0);padding:8px 10px 4px;text-transform:uppercase;border-bottom:1px solid var(--bdr)}
+.lod-row{padding:7px 10px;border-bottom:1px solid rgba(26,32,48,.6)}
+.lod-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.lod-name{font-size:10px;color:var(--t2)}
+.lod-pct{font-size:10px;color:var(--acc)}
+.lod-bar-wrap{height:2px;background:var(--bdr2);margin-bottom:4px}
+.lod-bar{height:100%;background:linear-gradient(90deg,var(--pur),var(--acc));transition:width .4s ease}
+.lod-info{font-size:9px;color:var(--t0);display:flex;justify-content:space-between}
+.lod-info .cnt{color:var(--grn)}
+.lod-info .sz{color:var(--t1)}
+input[type=range]{-webkit-appearance:none;width:100%;height:2px;background:var(--bdr2);outline:none;cursor:pointer;margin:4px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:8px;height:8px;background:var(--acc);cursor:pointer}
 
 /* CONTENT */
 #content{flex:1;display:flex;flex-direction:column;overflow:hidden}
-#vpwrap{flex:1;position:relative;overflow:hidden;background:#08090e}
+
+/* VIEWPORT */
+#vpwrap{flex:1;position:relative;overflow:hidden;background:#05060a}
 #vp{width:100%;height:100%;display:block}
 
 /* VP OVERLAYS */
-#vp-info{position:absolute;top:10px;left:10px;background:rgba(8,9,14,.88);border:1px solid var(--bdr2);padding:6px 10px;font-size:10px;line-height:1.9;display:none}
-.vi-r{display:flex;justify-content:space-between;gap:14px}
-.vi-k{color:var(--t0)}
-.vi-v{color:var(--t2)}
-.vi-v.g{color:var(--grn)}
-.vi-v.a{color:var(--acc)}
+#vp-badge{position:absolute;top:10px;left:10px;background:rgba(5,6,10,.9);border:1px solid var(--bdr2);padding:5px 10px;font-size:10px;line-height:1.8;display:none}
+.vb-r{display:flex;justify-content:space-between;gap:16px}
+.vb-k{color:var(--t0)}
+.vb-v{color:var(--t2)}
+.vb-v.g{color:var(--grn)}
+.vb-v.a{color:var(--acc)}
+.vb-v.y{color:var(--ylw)}
+
+/* LOD TAB BAR */
+#lod-tabs{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:2px;display:none}
+.lod-tab{height:24px;padding:0 12px;border:1px solid var(--bdr2);background:rgba(5,6,10,.88);color:var(--t1);font-family:var(--mono);font-size:9px;letter-spacing:.1em;cursor:pointer;transition:all .15s}
+.lod-tab:hover{border-color:var(--acc);color:var(--acc)}
+.lod-tab.on{border-color:var(--acc);color:var(--acc);background:rgba(0,212,232,.08)}
+.lod-tab .tc{font-size:8px;color:var(--t0);margin-top:1px}
 
 #vpctrl{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:3px}
-.vc-btn{width:34px;height:26px;border:1px solid var(--bdr2);background:rgba(8,9,14,.85);color:var(--t1);font-family:var(--mono);font-size:9px;letter-spacing:.04em;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
-.vc-btn:hover{border-color:var(--acc);color:var(--acc)}
-.vc-btn.on{border-color:var(--acc);color:var(--acc);background:rgba(0,200,215,.07)}
+.vc{width:30px;height:24px;border:1px solid var(--bdr2);background:rgba(5,6,10,.85);color:var(--t1);font-family:var(--mono);font-size:8px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.vc:hover{border-color:var(--acc);color:var(--acc)}
+.vc.on{border-color:var(--acc);color:var(--acc);background:rgba(0,212,232,.07)}
 
-#empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none}
-.em-icon{font-size:28px;color:var(--bdr2)}
-.em-txt{font-size:11px;color:var(--t0);letter-spacing:.16em;text-transform:uppercase}
-.em-sub{font-size:10px;color:var(--bdr);letter-spacing:.1em}
+#empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none}
+.em-i{font-size:24px;color:var(--bdr2)}
+.em-t{font-size:11px;color:var(--t0);letter-spacing:.16em}
+.em-s{font-size:9px;color:var(--bdr2);letter-spacing:.1em}
 
-#dropov{position:absolute;inset:0;border:2px solid var(--acc);background:rgba(0,200,215,.04);display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px}
+#dropov{position:absolute;inset:0;border:2px solid var(--acc);background:rgba(0,212,232,.03);display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px}
 #dropov.sh{display:flex}
 .do-t{font-size:14px;color:var(--acc);letter-spacing:.18em}
-.do-s{font-size:10px;color:var(--t1)}
+
+/* HISTOGRAM */
+#hist-wrap{height:60px;background:var(--bg);border-top:1px solid var(--bdr);padding:6px 10px;flex-shrink:0;display:none}
+.hist-lbl{font-size:9px;color:var(--t0);letter-spacing:.12em;margin-bottom:4px}
+#hist-canvas{width:100%;height:34px;display:block}
 
 /* RIGHT PANEL */
-#rpanel{width:200px;flex-shrink:0;border-left:1px solid var(--bdr);background:var(--bg2);display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent}
-.rps{border-bottom:1px solid var(--bdr);padding:9px}
-.rph{font-size:9px;letter-spacing:.2em;color:var(--t0);text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:5px}
+#rp{width:190px;flex-shrink:0;border-left:1px solid var(--bdr);background:var(--bg2);display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent}
+.rps{border-bottom:1px solid var(--bdr);padding:8px}
+.rph{font-size:8px;letter-spacing:.22em;color:var(--t0);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px}
 .rph::before{content:'';width:8px;height:1px;background:var(--bdr2)}
-#fps-n{font-size:30px;color:var(--acc);text-align:center;letter-spacing:-.02em;line-height:1}
-#fps-l{font-size:9px;color:var(--t0);letter-spacing:.2em;text-align:center;margin-top:2px}
-.sr{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(30,37,53,.5);font-size:10px}
+.sr{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(26,32,48,.4);font-size:9px}
 .sr:last-child{border-bottom:none}
 .sk{color:var(--t0)}
 .sv{color:var(--t2)}
 .sv.g{color:var(--grn)}
 .sv.a{color:var(--acc)}
+.sv.y{color:var(--ylw)}
 
-/* CONTROLS */
-.cg{margin-bottom:9px}
-.cg:last-child{margin-bottom:0}
-.ct{display:flex;justify-content:space-between;margin-bottom:4px}
-.cn{font-size:10px;color:var(--t1)}
-.cv{font-size:10px;color:var(--acc)}
-input[type=range]{-webkit-appearance:none;width:100%;height:2px;background:var(--bdr2);outline:none;cursor:pointer}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:8px;height:8px;background:var(--acc);cursor:pointer}
+#fps-n{font-size:28px;color:var(--acc);text-align:center;line-height:1;letter-spacing:-.02em}
+#fps-l{font-size:8px;color:var(--t0);letter-spacing:.2em;text-align:center;margin-top:2px}
 
-/* TOGGLES */
-.tgr{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
-.tgr:last-child{margin-bottom:0}
-.tgl{font-size:10px;color:var(--t1)}
-.tg{width:26px;height:13px;border:1px solid var(--bdr2);background:transparent;position:relative;cursor:pointer;transition:all .2s;flex-shrink:0}
-.tg.on{border-color:var(--acc);background:rgba(0,200,215,.09)}
-.tg::after{content:'';position:absolute;top:2px;left:2px;width:7px;height:7px;background:var(--bdr2);transition:all .2s}
-.tg.on::after{left:15px;background:var(--acc)}
+/* LOD COMPARISON TABLE */
+.lod-tbl{width:100%;border-collapse:collapse;font-size:9px}
+.lod-tbl th{color:var(--t0);text-align:left;padding:3px 4px;border-bottom:1px solid var(--bdr2);font-weight:normal;letter-spacing:.08em}
+.lod-tbl td{padding:3px 4px;border-bottom:1px solid rgba(26,32,48,.3)}
+.lod-tbl tr:last-child td{border-bottom:none}
+.lod-tbl .ln{color:var(--acc)}
+.lod-tbl .lc{color:var(--grn)}
+.lod-tbl .ls{color:var(--t2)}
+.lod-tbl .lr{color:var(--t1)}
+.lod-tbl tr.active-lod td{background:rgba(0,212,232,.05)}
+
+/* SCORE BAR */
+.score-bar{height:3px;background:var(--bdr2);margin-top:2px}
+.score-fill{height:100%;background:linear-gradient(90deg,var(--pur),var(--acc));transition:width .5s}
 
 /* RP BUTTON */
-.rb{width:100%;height:26px;border:1px solid var(--bdr2);background:transparent;color:var(--t1);font-family:var(--mono);font-size:10px;letter-spacing:.09em;cursor:pointer;transition:all .15s;margin-bottom:5px;display:flex;align-items:center;justify-content:center;gap:5px}
+.rb{width:100%;height:24px;border:1px solid var(--bdr2);background:transparent;color:var(--t1);font-family:var(--mono);font-size:9px;letter-spacing:.09em;cursor:pointer;transition:all .15s;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:5px}
 .rb:last-child{margin-bottom:0}
 .rb:hover{border-color:var(--acc);color:var(--acc)}
-.rb.a{border-color:rgba(0,200,215,.3);color:var(--acc)}
+.rb.a{border-color:rgba(0,212,232,.3);color:var(--acc)}
+.rb.g{border-color:rgba(0,230,118,.3);color:var(--grn)}
+.rb.g:hover{border-color:var(--grn);background:rgba(0,230,118,.05)}
+.rb:disabled{opacity:.3;cursor:default}
 
 /* BOTTOM */
-#bottom{flex-shrink:0;border-top:1px solid var(--bdr);background:var(--bg2)}
-#pbwrap{height:3px;background:var(--panel)}
-#pb{height:100%;background:var(--grn);width:0%;transition:width .3s ease;box-shadow:0 0 5px var(--grn2)}
-#bstatus{display:flex;align-items:center;padding:5px 12px;gap:14px;border-bottom:1px solid var(--bdr)}
-.bs-m{font-size:11px;color:var(--t2);flex:1}
-.bs-i{font-size:10px;color:var(--t0)}
-.bs-i span{color:var(--t1)}
-#bbtns{display:flex;gap:1px;flex-shrink:0}
-.rn{height:24px;padding:0 12px;border:none;font-family:var(--mono);font-size:10px;letter-spacing:.1em;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
-#bn-demo{background:#0d1620;color:var(--acc);border:1px solid rgba(0,200,215,.2)}
-#bn-imp{background:#091610;color:var(--grn);border:1px solid rgba(0,230,118,.2)}
-#bn-shot{background:#0d1620;color:var(--t1);border:1px solid var(--bdr2)}
-#bn-demo:hover{background:rgba(0,200,215,.08)}
+#bot{flex-shrink:0;border-top:1px solid var(--bdr);background:var(--bg2)}
+#pbw{height:3px;background:var(--panel)}
+#pb{height:100%;width:0%;transition:width .25s ease}
+#bst{display:flex;align-items:center;padding:4px 12px;gap:12px;border-bottom:1px solid var(--bdr)}
+.bm{font-size:10px;color:var(--t2);flex:1}
+.bi{font-size:9px;color:var(--t0)}
+#bbtns{display:flex;gap:1px}
+.rn{height:22px;padding:0 10px;border:none;font-family:var(--mono);font-size:9px;letter-spacing:.1em;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s}
+#bn-imp{background:#091208;color:var(--grn);border:1px solid rgba(0,230,118,.2)}
+#bn-gen{background:#091018;color:var(--acc);border:1px solid rgba(0,212,232,.2)}
+#bn-zip{background:#120918;color:var(--pur);border:1px solid rgba(124,77,255,.2)}
 #bn-imp:hover{background:rgba(0,230,118,.08)}
-#bn-shot:hover{color:var(--acc);border-color:var(--acc)}
-#logarea{height:86px;overflow-y:auto;padding:4px 12px;display:flex;flex-direction:column-reverse;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent}
-.ll{display:flex;gap:10px;align-items:baseline;padding:1px 0;font-size:10px;line-height:1.6}
-.lt{color:var(--bdr2);font-size:9px;flex-shrink:0}
+#bn-gen:hover{background:rgba(0,212,232,.08)}
+#bn-zip:hover{background:rgba(124,77,255,.08)}
+.rn:disabled{opacity:.3;cursor:default}
+#log{height:72px;overflow-y:auto;padding:3px 12px;display:flex;flex-direction:column-reverse;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent}
+.ll{display:flex;gap:10px;font-size:9px;line-height:1.7;flex-shrink:0}
+.lt{color:var(--bdr2);flex-shrink:0}
 .lok{color:var(--grn);flex-shrink:0}
 .ler{color:var(--red);flex-shrink:0}
 .linf{color:var(--acc);flex-shrink:0}
+.lwr{color:var(--ylw);flex-shrink:0}
 .lm{color:var(--t1)}
 #file-input{display:none}
 </style>
 </head>
 <body>
-<input type="file" id="file-input" accept=".ply,.splat,.spz,.ksplat">
+<input type="file" id="file-input" accept=".ply">
 
-<!-- TITLE BAR -->
-<div id="titlebar">
-  <div class="t-icon">◈</div>
-  <div class="t-name">SPLAT FORGE</div>
-  <div class="t-sub">GAUSSIAN SPLAT VIEWER <b>·</b> REAL-TIME 3DGS <b>·</b> BROWSER-NATIVE</div>
-  <div class="t-right">
-    <button class="t-btn" onclick="saveSession()">Save Session</button>
-    <button class="t-btn" onclick="loadSession()">Load Session</button>
-    <div class="sysbadge"><div class="dot" id="sysdot"></div><span id="syslbl">SYSTEM READY</span></div>
+<!-- TITLEBAR -->
+<div id="tb">
+  <div class="t-ico">⊛</div>
+  <div class="t-name">SPLAT LOD FORGE</div>
+  <div class="t-sub">PLY BINARY PARSER <b>·</b> WEB WORKER <b>·</b> LOD GENERATOR <b>·</b> EXPORT</div>
+  <div class="t-r">
+    <div class="sysbadge"><div class="dot" id="sysdot"></div><span id="syslbl">READY</span></div>
   </div>
 </div>
 
-<!-- STEP BAR -->
-<div id="stepbar">
-  <div class="step on" id="step1" onclick="activateStep(1)"><div class="sn" id="sn1">1</div><div><div class="st">Import Splat</div><div class="ss">Drop .ply · .splat · .spz</div></div></div>
-  <div class="step"    id="step2" onclick="activateStep(2)"><div class="sn" id="sn2">2</div><div><div class="st">Configure</div><div class="ss">Alpha · Scale · Splat Size</div></div></div>
-  <div class="step"    id="step3" onclick="activateStep(3)"><div class="sn" id="sn3">3</div><div><div class="st">Viewport</div><div class="ss">Inspect · Navigate · Compare</div></div></div>
-  <div class="step"    id="step4" onclick="activateStep(4)"><div class="sn" id="sn4">4</div><div><div class="st">Export</div><div class="ss">Screenshot · Session</div></div></div>
+<!-- STEPBAR -->
+<div id="sb">
+  <div class="step on" id="step1"><div class="sn" id="sn1">1</div><div><div class="st">Import PLY</div><div class="ss">Binary parse · Worker</div></div></div>
+  <div class="step"    id="step2"><div class="sn" id="sn2">2</div><div><div class="st">Analyze</div><div class="ss">Score · Sort · Histogram</div></div></div>
+  <div class="step"    id="step3"><div class="sn" id="sn3">3</div><div><div class="st">Generate LODs</div><div class="ss">Slice · Preview · Compare</div></div></div>
+  <div class="step"    id="step4"><div class="sn" id="sn4">4</div><div><div class="st">Export</div><div class="ss">PLY per level · ZIP</div></div></div>
 </div>
 
 <!-- MAIN -->
 <div id="main">
   <!-- SIDEBAR -->
-  <div id="sidebar">
-    <div class="sb-hdr"><div class="sb-sq"></div><div class="sb-ttl">SOURCE FILES (.PLY · .SPLAT · .SPZ)</div></div>
-    <div class="fcount" id="fcount">0 file(s) loaded</div>
-    <button class="sb-btn p" onclick="document.getElementById('file-input').click()">⊕ &nbsp;Select Splat File</button>
+  <div id="side">
+    <div class="sh"><div class="sh-sq"></div><div class="sh-t">SOURCE · PLY GAUSSIAN SPLAT</div></div>
+    <button class="sb-btn p" onclick="document.getElementById('file-input').click()">⊕ &nbsp;Import PLY File</button>
     <div class="sb-row">
       <button class="sb-btn" onclick="loadDemo()">◈ Demo</button>
-      <button class="sb-btn" onclick="clearScene()">✕ Clear</button>
+      <button class="sb-btn" onclick="clearAll()">✕ Clear</button>
     </div>
-    <div class="sortbar">
-      <div class="sotab on">Name ↑</div>
-      <div class="sotab">Size</div>
-      <div class="sotab">Date</div>
+
+    <!-- Worker status -->
+    <div id="wstatus">
+      <div class="ws-row"><span class="ws-key">Thread</span><span class="ws-val" id="ws-thread">IDLE</span></div>
+      <div class="ws-row"><span class="ws-key">Parsed</span><span class="ws-val" id="ws-parsed">—</span></div>
+      <div class="ws-row"><span class="ws-key">Scored</span><span class="ws-val" id="ws-scored">—</span></div>
+      <div class="ws-row"><span class="ws-key">Memory</span><span class="ws-val" id="ws-mem">—</span></div>
     </div>
-    <div class="flist" id="flist"></div>
+
+    <!-- LOD Config -->
+    <div class="lc-hdr">LOD LEVELS</div>
+    <div class="lod-cfg" id="lod-cfg">
+      <!-- populated by JS -->
+    </div>
   </div>
 
   <!-- CONTENT -->
   <div id="content">
     <div id="vpwrap">
       <canvas id="vp"></canvas>
-      <div id="empty">
-        <div class="em-icon">◈</div>
-        <div class="em-txt">Drop Splat File Here</div>
-        <div class="em-sub">.PLY · .SPLAT · .SPZ · .KSPLAT</div>
+      <div id="empty"><div class="em-i">⊛</div><div class="em-t">Drop .PLY Gaussian Splat</div><div class="em-s">BINARY PARSE · WEB WORKER · LOD GENERATE</div></div>
+      <div id="dropov"><div class="do-t">RELEASE TO PARSE</div></div>
+      <div id="vp-badge">
+        <div class="vb-r"><span class="vb-k">File</span><span class="vb-v" id="vb-f">—</span></div>
+        <div class="vb-r"><span class="vb-k">Total Splats</span><span class="vb-v g" id="vb-cnt">—</span></div>
+        <div class="vb-r"><span class="vb-k">Viewing LOD</span><span class="vb-v a" id="vb-lod">—</span></div>
+        <div class="vb-r"><span class="vb-k">Splats (level)</span><span class="vb-v y" id="vb-lcnt">—</span></div>
       </div>
-      <div id="dropov"><div class="do-t">RELEASE TO LOAD</div><div class="do-s">.PLY · .SPLAT · .SPZ · .KSPLAT</div></div>
-      <div id="vp-info">
-        <div class="vi-r"><span class="vi-k">File</span><span class="vi-v" id="vi-f">—</span></div>
-        <div class="vi-r"><span class="vi-k">Format</span><span class="vi-v a" id="vi-fmt">—</span></div>
-        <div class="vi-r"><span class="vi-k">Splats</span><span class="vi-v g" id="vi-cnt">—</span></div>
-      </div>
+      <div id="lod-tabs"></div>
       <div id="vpctrl">
-        <button class="vc-btn" onclick="resetCamera()" title="Reset">⌖</button>
-        <button class="vc-btn" id="btn-grd" onclick="toggleGrid(this)" title="Grid">GRD</button>
-        <button class="vc-btn" id="btn-axs" onclick="toggleAxes(this)" title="Axes">AXS</button>
-        <button class="vc-btn" id="btn-rot" onclick="toggleRotate(this)" title="Rotate">ROT</button>
-        <button class="vc-btn" onclick="setTopView()" title="Top">TOP</button>
-        <button class="vc-btn" onclick="setFrontView()" title="Front">FRT</button>
+        <button class="vc" onclick="resetCam()" title="Reset">⌖</button>
+        <button class="vc" id="vc-grd" onclick="togGrid(this)" title="Grid">GRD</button>
+        <button class="vc" id="vc-rot" onclick="togRot(this)" title="Rotate">ROT</button>
       </div>
+    </div>
+    <div id="hist-wrap">
+      <div class="hist-lbl">LOD SCORE DISTRIBUTION — higher score = more visually significant splat</div>
+      <canvas id="hist-canvas"></canvas>
     </div>
   </div>
 
   <!-- RIGHT PANEL -->
-  <div id="rpanel">
+  <div id="rp">
+    <div class="rps"><div id="fps-n">—</div><div id="fps-l">FPS</div></div>
     <div class="rps">
-      <div class="rph">Performance</div>
-      <div id="fps-n">—</div><div id="fps-l">FRAMES / SEC</div>
+      <div class="rph">File Info</div>
+      <div class="sr"><div class="sk">Filename</div><div class="sv a" id="ri-name">—</div></div>
+      <div class="sr"><div class="sk">File Size</div><div class="sv" id="ri-sz">—</div></div>
+      <div class="sr"><div class="sk">Total Splats</div><div class="sv g" id="ri-cnt">—</div></div>
+      <div class="sr"><div class="sk">Properties</div><div class="sv" id="ri-props">—</div></div>
+      <div class="sr"><div class="sk">Parse Time</div><div class="sv y" id="ri-pt">—</div></div>
     </div>
     <div class="rps">
-      <div class="rph">Scene Stats</div>
-      <div class="sr"><div class="sk">Splat Count</div><div class="sv g" id="st-cnt">—</div></div>
-      <div class="sr"><div class="sk">Format</div><div class="sv a" id="st-fmt">—</div></div>
-      <div class="sr"><div class="sk">File Size</div><div class="sv" id="st-sz">—</div></div>
-      <div class="sr"><div class="sk">Status</div><div class="sv" id="st-st">IDLE</div></div>
+      <div class="rph">LOD Comparison</div>
+      <table class="lod-tbl" id="lod-tbl">
+        <tr><th>Level</th><th>Keep%</th><th>Splats</th><th>Size</th></tr>
+      </table>
+    </div>
+    <div class="rps">
+      <div class="rph">Score Stats</div>
+      <div class="sr"><div class="sk">Min Score</div><div class="sv" id="sc-min">—</div></div>
+      <div class="sr"><div class="sk">Max Score</div><div class="sv" id="sc-max">—</div></div>
+      <div class="sr"><div class="sk">Mean Score</div><div class="sv" id="sc-avg">—</div></div>
+      <div class="sr"><div class="sk">Algorithm</div><div class="sv a">opacity×scale</div></div>
     </div>
     <div class="rps">
       <div class="rph">Camera</div>
-      <div class="sr"><div class="sk">X</div><div class="sv" id="cx">0.00</div></div>
-      <div class="sr"><div class="sk">Y</div><div class="sv" id="cy">0.00</div></div>
-      <div class="sr"><div class="sk">Z</div><div class="sv" id="cz">0.00</div></div>
-    </div>
-    <div class="rps">
-      <div class="rph">Splat Controls</div>
-      <div class="cg"><div class="ct"><span class="cn">Alpha Threshold</span><span class="cv" id="v-al">5</span></div><input type="range" id="s-al" min="0" max="50" value="5" step="1"></div>
-      <div class="cg"><div class="ct"><span class="cn">Scale</span><span class="cv" id="v-sc">1.00</span></div><input type="range" id="s-sc" min="0.1" max="3.0" value="1.0" step="0.05"></div>
-      <div class="cg"><div class="ct"><span class="cn">Splat Size</span><span class="cv" id="v-si">1.0</span></div><input type="range" id="s-si" min="0.1" max="4.0" value="1.0" step="0.1"></div>
-    </div>
-    <div class="rps">
-      <div class="rph">Viewport</div>
-      <div class="tgr"><div class="tgl">Grid Floor</div><div class="tg" id="tg-grd" onclick="toggleGrid(document.getElementById('btn-grd'))"></div></div>
-      <div class="tgr"><div class="tgl">Axes Helper</div><div class="tg" id="tg-axs" onclick="toggleAxes(document.getElementById('btn-axs'))"></div></div>
-      <div class="tgr"><div class="tgl">Auto-Rotate</div><div class="tg" id="tg-rot" onclick="toggleRotate(document.getElementById('btn-rot'))"></div></div>
+      <div class="sr"><div class="sk">X</div><div class="sv" id="cx">—</div></div>
+      <div class="sr"><div class="sk">Y</div><div class="sv" id="cy">—</div></div>
+      <div class="sr"><div class="sk">Z</div><div class="sv" id="cz">—</div></div>
     </div>
     <div class="rps">
       <div class="rph">Export</div>
-      <button class="rb a" onclick="takeScreenshot()">⬡ &nbsp;Screenshot</button>
-      <button class="rb" onclick="saveSession()">↓ &nbsp;Save Session</button>
+      <button class="rb g" id="rb-zip" onclick="exportZip()" disabled>⬡ &nbsp;Export ZIP (all LODs)</button>
+      <button class="rb a" id="rb-ply0" onclick="exportLod(0)" disabled>↓ &nbsp;Export LOD0 PLY</button>
+      <button class="rb" id="rb-ss" onclick="screenshot()">⬡ &nbsp;Screenshot</button>
     </div>
   </div>
 </div>
 
 <!-- BOTTOM -->
-<div id="bottom">
-  <div id="pbwrap"><div id="pb"></div></div>
-  <div id="bstatus">
-    <div class="bs-m" id="bs-m">Drop a .splat / .ply / .spz / .ksplat — or click Demo Scene</div>
-    <div class="bs-i" id="bs-i"></div>
+<div id="bot">
+  <div id="pbw"><div id="pb"></div></div>
+  <div id="bst">
+    <div class="bm" id="bm">Drop a .ply Gaussian Splat file — binary parsed on a Web Worker, zero UI blocking</div>
+    <div class="bi" id="bi"></div>
     <div id="bbtns">
-      <button class="rn" id="bn-demo" onclick="loadDemo()">◈ &nbsp;Demo Scene</button>
-      <button class="rn" id="bn-imp"  onclick="document.getElementById('file-input').click()">⊕ &nbsp;Import File</button>
-      <button class="rn" id="bn-shot" onclick="takeScreenshot()">⬡ &nbsp;Screenshot</button>
+      <button class="rn" id="bn-imp" onclick="document.getElementById('file-input').click()">⊕ Import PLY</button>
+      <button class="rn" id="bn-gen" onclick="generateLods()" disabled>⚙ Generate LODs</button>
+      <button class="rn" id="bn-zip" onclick="exportZip()" disabled>⬡ Export ZIP</button>
     </div>
   </div>
-  <div id="logarea"></div>
+  <div id="log"></div>
 </div>
 
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { SplatMesh } from '@sparkjsdev/spark';
 
-const canvas = document.getElementById('vp');
+// ── WEB WORKER (inline blob) ──────────────────────────────────────────────────
+const WORKER_SRC = `
+self.onmessage = function(e) {
+  const { type, buffer, lodConfigs } = e.data;
+
+  if (type === 'PARSE') {
+    try {
+      const t0 = performance.now();
+      self.postMessage({ type: 'STATUS', msg: 'Parsing PLY header...' });
+
+      const bytes = new Uint8Array(buffer);
+      const headerEnd = findHeaderEnd(bytes);
+      const headerText = new TextDecoder().decode(bytes.slice(0, headerEnd));
+      const { numSplats, props, stride } = parseHeader(headerText);
+
+      self.postMessage({ type: 'STATUS', msg: 'Parsing ' + numSplats.toLocaleString() + ' splats...' });
+
+      const dataStart = headerEnd;
+      const data = new DataView(buffer, dataStart);
+
+      // Extract opacity and scale for scoring
+      const opacityOff  = props.opacity  !== undefined ? props.opacity  : -1;
+      const scaleXOff   = props.scale_0  !== undefined ? props.scale_0  : -1;
+      const scaleYOff   = props.scale_1  !== undefined ? props.scale_1  : -1;
+      const scaleZOff   = props.scale_2  !== undefined ? props.scale_2  : -1;
+
+      const scores   = new Float32Array(numSplats);
+      const indices  = new Uint32Array(numSplats);
+
+      let minScore = Infinity, maxScore = -Infinity, sumScore = 0;
+
+      for (let i = 0; i < numSplats; i++) {
+        const base = i * stride;
+        let opacity = 1.0, sx = 1.0, sy = 1.0, sz = 1.0;
+
+        if (opacityOff >= 0) opacity = sigmoid(data.getFloat32(base + opacityOff, true));
+        if (scaleXOff  >= 0) sx = Math.exp(data.getFloat32(base + scaleXOff,  true));
+        if (scaleYOff  >= 0) sy = Math.exp(data.getFloat32(base + scaleYOff,  true));
+        if (scaleZOff  >= 0) sz = Math.exp(data.getFloat32(base + scaleZOff,  true));
+
+        const maxScale = Math.max(sx, sy, sz);
+        const score = opacity * maxScale;
+        scores[i] = score;
+        indices[i] = i;
+        if (score < minScore) minScore = score;
+        if (score > maxScore) maxScore = score;
+        sumScore += score;
+
+        if (i % 50000 === 0 && i > 0) {
+          self.postMessage({ type: 'PROGRESS', pct: Math.round((i / numSplats) * 60) });
+        }
+      }
+
+      self.postMessage({ type: 'STATUS', msg: 'Sorting by LOD score...' });
+      self.postMessage({ type: 'PROGRESS', pct: 65 });
+
+      // Sort indices descending by score (highest quality first)
+      indices.sort((a, b) => scores[b] - scores[a]);
+
+      self.postMessage({ type: 'PROGRESS', pct: 80 });
+
+      // Build histogram (50 buckets)
+      const buckets = 50;
+      const hist = new Array(buckets).fill(0);
+      const range = maxScore - minScore || 1;
+      for (let i = 0; i < numSplats; i++) {
+        const b = Math.min(buckets - 1, Math.floor(((scores[i] - minScore) / range) * buckets));
+        hist[b]++;
+      }
+
+      const parseTime = (performance.now() - t0).toFixed(0);
+      self.postMessage({ type: 'PROGRESS', pct: 100 });
+      self.postMessage({
+        type: 'PARSED',
+        numSplats, stride, dataStart,
+        scores: scores.buffer,
+        indices: indices.buffer,
+        props,
+        hist,
+        stats: { min: minScore, max: maxScore, avg: sumScore / numSplats },
+        parseTime
+      }, [scores.buffer, indices.buffer]);
+
+    } catch(err) {
+      self.postMessage({ type: 'ERROR', msg: err.message });
+    }
+  }
+
+  if (type === 'SLICE') {
+    // Slice sorted indices for each LOD level and rebuild PLY buffers
+    const { buffer, dataStart, stride, sortedIndices, numSplats, lodPcts, props } = e.data;
+    const indices = new Uint32Array(sortedIndices);
+    const srcData = new Uint8Array(buffer, dataStart);
+    const results = [];
+
+    for (let l = 0; l < lodPcts.length; l++) {
+      const keep = Math.max(1, Math.round(numSplats * lodPcts[l] / 100));
+      const lodBuf = new Uint8Array(keep * stride);
+      for (let i = 0; i < keep; i++) {
+        const srcOff = indices[i] * stride;
+        lodBuf.set(srcData.slice(srcOff, srcOff + stride), i * stride);
+      }
+      results.push({ level: l, keep, buf: lodBuf.buffer });
+      self.postMessage({ type: 'PROGRESS', pct: Math.round(((l+1)/lodPcts.length)*90) });
+    }
+
+    self.postMessage({ type: 'SLICED', results, props }, results.map(r => r.buf));
+  }
+};
+
+function findHeaderEnd(bytes) {
+  const end = new TextDecoder().decode(bytes.slice(0, 2048));
+  const marker = 'end_header\\n';
+  const idx = end.indexOf(marker);
+  if (idx < 0) throw new Error('No end_header found');
+  return idx + marker.length;
+}
+
+function parseHeader(text) {
+  const lines = text.split('\\n');
+  let numSplats = 0, props = {}, offset = 0, stride = 0;
+  const TYPE_SIZES = { float: 4, uchar: 1, uint: 4, int: 4, double: 8, short: 2, ushort: 2 };
+  let inVertex = false;
+  for (const line of lines) {
+    const t = line.trim();
+    if (t.startsWith('element vertex')) { numSplats = parseInt(t.split(' ')[2]); inVertex = true; }
+    else if (t.startsWith('element ') && !t.startsWith('element vertex')) inVertex = false;
+    else if (t.startsWith('property') && inVertex) {
+      const parts = t.split(' ');
+      const ptype = parts[1], pname = parts[2];
+      props[pname] = offset;
+      offset += TYPE_SIZES[ptype] || 4;
+    }
+  }
+  stride = offset;
+  return { numSplats, props, stride };
+}
+
+function sigmoid(x) { return 1 / (1 + Math.exp(-x)); }
+`;
+
+const workerBlob = new Blob([WORKER_SRC], { type: 'application/javascript' });
+const workerUrl  = URL.createObjectURL(workerBlob);
+
+// ── THREE.JS SETUP ────────────────────────────────────────────────────────────
+const canvas   = document.getElementById('vp');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
-renderer.setClearColor(0x08090e, 1);
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60, 1, 0.01, 500);
-camera.position.set(0, 1, 5);
+renderer.setClearColor(0x05060a, 1);
+const scene    = new THREE.Scene();
+const camera   = new THREE.PerspectiveCamera(60, 1, 0.001, 500);
+camera.position.set(0, 0, 3);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; controls.dampingFactor = 0.06;
-controls.minDistance = 0.1; controls.maxDistance = 100;
 
-const axes = new THREE.AxesHelper(1);
-const grid = new THREE.GridHelper(10, 20, 0x111820, 0x0d1520);
-axes.visible = false; grid.visible = false;
-scene.add(axes, grid);
+const gridH = new THREE.GridHelper(6, 24, 0x0d1520, 0x0a1018);
+gridH.visible = false;
+scene.add(gridH);
 
-let splat = null, autoRot = false, gridOn = false, axesOn = false;
-let fps = 0, frames = 0, fpsTs = performance.now();
-let files = [];
+let autoRot = false, gridOn = false;
+let currentPoints = null;
+let lodData = [];       // { keep, buf, points }
+let currentLod = 0;
+let splatState = null;  // { buffer, dataStart, stride, indices, numSplats, props, fileName, fileSize }
+let worker = null;
 
+// LOD configs
+const lodConfigs = [
+  { name: 'LOD0', pct: 100, color: '#00e676' },
+  { name: 'LOD1', pct: 60,  color: '#00c8d7' },
+  { name: 'LOD2', pct: 30,  color: '#7c4dff' },
+  { name: 'LOD3', pct: 12,  color: '#ffc107' },
+  { name: 'LOD4', pct: 4,   color: '#ff3d5a' },
+];
+
+// ── RESIZE ────────────────────────────────────────────────────────────────────
 function resize() {
   const w = document.getElementById('vpwrap'), W = w.clientWidth, H = w.clientHeight;
-  renderer.setSize(W, H, false);
-  camera.aspect = W / H; camera.updateProjectionMatrix();
+  renderer.setSize(W, H, false); camera.aspect = W/H; camera.updateProjectionMatrix();
 }
 new ResizeObserver(resize).observe(document.getElementById('vpwrap'));
 resize();
 
-function log(msg, t = 'inf') {
-  const a = document.getElementById('logarea');
+// ── LOG ───────────────────────────────────────────────────────────────────────
+function log(msg, t='inf') {
+  const a = document.getElementById('log');
   const now = new Date();
-  const ts = [now.getHours(), now.getMinutes(), now.getSeconds()].map(n => String(n).padStart(2,'0')).join(':');
-  const sym = t==='ok'?'✓':t==='err'?'✕':'·';
-  const cls = t==='ok'?'lok':t==='err'?'ler':'linf';
-  const el = document.createElement('div');
-  el.className = 'll';
-  el.innerHTML = `<span class="lt">[${ts}]</span><span class="${cls}">${sym}</span><span class="lm">${msg}</span>`;
+  const ts = [now.getHours(),now.getMinutes(),now.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');
+  const sym = t==='ok'?'✓':t==='err'?'✕':t==='wr'?'!':'·';
+  const cls = `l${t}`;
+  const el = document.createElement('div'); el.className='ll';
+  el.innerHTML=`<span class="lt">[${ts}]</span><span class="${cls}">${sym}</span><span class="lm">${msg}</span>`;
   a.prepend(el);
-  while (a.children.length > 80) a.removeChild(a.lastChild);
+  while(a.children.length>100)a.removeChild(a.lastChild);
 }
+function setStatus(m,i=''){document.getElementById('bm').textContent=m;document.getElementById('bi').innerHTML=i;}
+function setSys(s,t){document.getElementById('sysdot').className='dot '+(s==='ok'?'ok':s==='ld'?'ld':s==='wr'?'wr':'');document.getElementById('syslbl').textContent=t;}
+function prog(p,color='var(--acc)'){const b=document.getElementById('pb');b.style.width=p+'%';b.style.background=color;}
 
-function setSys(state, lbl) {
-  document.getElementById('sysdot').className = 'dot ' + (state==='ok'?'ok':state==='ld'?'ld':'');
-  document.getElementById('syslbl').textContent = lbl;
-}
-function setStatus(m, i='') { document.getElementById('bs-m').textContent=m; document.getElementById('bs-i').innerHTML=i; }
-function setStSt(t,c='') { const e=document.getElementById('st-st'); e.textContent=t; e.className='sv '+c; }
-function progress(p) { document.getElementById('pb').style.width = p+'%'; }
-
-async function loadSplat(url, name, fmt, sz=null) {
-  setSys('ld','LOADING');
-  setStatus(`Loading — ${name}`);
-  setStSt('LOADING','a');
-  document.getElementById('empty').style.display = 'none';
-  progress(0);
-  let p=0;
-  const pi = setInterval(()=>{ p=Math.min(85,p+Math.random()*9); progress(p); }, 180);
-  try {
-    if (splat) { scene.remove(splat); splat.dispose?.(); splat=null; }
-    log(`Loading: ${name} (${fmt.toUpperCase()})`);
-    const s = new SplatMesh({ url });
-    scene.add(s); splat = s;
-    await new Promise(res => {
-      let t=0;
-      const id = setInterval(()=>{ t+=150; if(s.ready||s.splatCount>0||t>12000){clearInterval(id);res();} },150);
+// ── LOD CONFIG UI ─────────────────────────────────────────────────────────────
+function buildLodUI() {
+  const cfg = document.getElementById('lod-cfg');
+  cfg.innerHTML = '';
+  lodConfigs.forEach((lc, i) => {
+    const row = document.createElement('div'); row.className='lod-row';
+    row.innerHTML = `
+      <div class="lod-top">
+        <span class="lod-name" style="color:${lc.color}">${lc.name}</span>
+        <span class="lod-pct" id="lpct-${i}">${lc.pct}%</span>
+      </div>
+      <input type="range" id="lslider-${i}" min="1" max="100" value="${lc.pct}" step="1">
+      <div class="lod-bar-wrap"><div class="lod-bar" id="lbar-${i}" style="width:${lc.pct}%;background:${lc.color}"></div></div>
+      <div class="lod-info">
+        <span class="cnt" id="lcnt-${i}">—</span>
+        <span class="sz" id="lsz-${i}">—</span>
+      </div>`;
+    cfg.appendChild(row);
+    document.getElementById(`lslider-${i}`).addEventListener('input', function() {
+      lodConfigs[i].pct = parseInt(this.value);
+      document.getElementById(`lpct-${i}`).textContent = this.value+'%';
+      document.getElementById(`lbar-${i}`).style.width = this.value+'%';
+      updateLodEstimates();
     });
-    clearInterval(pi); progress(100);
-    const sv = parseFloat(document.getElementById('s-sc').value);
-    s.scale.setScalar(sv);
-    const cnt = s.splatCount || s.numSplats || '—';
-    const short = name.length>15 ? name.slice(0,13)+'…' : name;
-    document.getElementById('vi-f').textContent   = short;
-    document.getElementById('vi-fmt').textContent = fmt.toUpperCase();
-    document.getElementById('vi-cnt').textContent = typeof cnt==='number'?cnt.toLocaleString():cnt;
-    document.getElementById('vp-info').style.display = 'block';
-    document.getElementById('st-cnt').textContent = typeof cnt==='number'?cnt.toLocaleString():cnt;
-    document.getElementById('st-fmt').textContent = fmt.toUpperCase();
-    document.getElementById('st-sz').textContent  = sz ? fmtB(sz) : '—';
-    if (!files.find(f=>f.name===name)) { files.push({name,fmt,sz}); refreshList(); }
-    document.getElementById('fcount').textContent = `${files.length} file(s) loaded`;
-    // Frame
-    try { const b=new THREE.Box3().setFromObject(s); if(!b.isEmpty()){const c=b.getCenter(new THREE.Vector3()),sz2=b.getSize(new THREE.Vector3()),m=Math.max(sz2.x,sz2.y,sz2.z); controls.target.copy(c); camera.position.copy(c).add(new THREE.Vector3(0,m*.3,m*1.8)); controls.update();} } catch(e){}
-    markDone(1); markDone(2); markDone(3);
-    setSys('ok','SCENE LOADED');
-    setStatus(`${name} loaded`,`<span>${typeof cnt==='number'?cnt.toLocaleString():'—'} splats · ${fmt.toUpperCase()}</span>`);
-    setStSt('ACTIVE','g');
-    log(`Loaded: ${name} · ${typeof cnt==='number'?cnt.toLocaleString():'—'} splats`,'ok');
-    setTimeout(()=>progress(0),1500);
-  } catch(err) {
-    clearInterval(pi); progress(0);
-    setSys('','ERROR');
-    setStSt('ERROR','');
-    setStatus(`Load failed — ${err.message}`);
-    log(`Error: ${err.message}`,'err');
-  }
+  });
+}
+buildLodUI();
+
+function updateLodEstimates() {
+  if (!splatState) return;
+  const n = splatState.numSplats;
+  lodConfigs.forEach((lc,i)=>{
+    const keep = Math.round(n*lc.pct/100);
+    document.getElementById(`lcnt-${i}`).textContent = keep.toLocaleString()+' splats';
+    document.getElementById(`lsz-${i}`).textContent  = fmtB(keep*splatState.stride);
+  });
+  buildLodTable();
 }
 
-function fmtB(b){ return b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB'; }
-
-function refreshList() {
-  const l = document.getElementById('flist');
-  l.innerHTML = '';
-  files.forEach(f => {
-    const el = document.createElement('div');
-    el.className = 'fi on';
-    el.innerHTML = `<div class="fi-d ok"></div><div class="fi-n">${f.name}</div>`;
-    l.appendChild(el);
+function buildLodTable() {
+  if (!splatState) return;
+  const n = splatState.numSplats;
+  const tbl = document.getElementById('lod-tbl');
+  tbl.innerHTML = '<tr><th>Level</th><th>Keep</th><th>Splats</th><th>~Size</th></tr>';
+  lodConfigs.forEach((lc,i)=>{
+    const keep = Math.round(n*lc.pct/100);
+    const tr = document.createElement('tr');
+    if(i===currentLod)tr.className='active-lod';
+    tr.innerHTML=`<td class="ln">${lc.name}</td><td class="lr">${lc.pct}%</td><td class="lc">${keep.toLocaleString()}</td><td class="ls">${fmtB(keep*splatState.stride)}</td>`;
+    tbl.appendChild(tr);
   });
 }
 
-window.loadDemo = function() {
-  log('Loading demo: butterfly.spz');
-  loadSplat('https://sparkjs.dev/assets/splats/butterfly.spz','butterfly.spz','spz');
+// ── PARSE PLY via WORKER ───────────────────────────────────────────────────────
+function parsePly(buffer, fileName, fileSize) {
+  if (worker) { worker.terminate(); }
+  worker = new Worker(workerUrl);
+  setSys('ld','WORKER ACTIVE');
+  setStatus('Web Worker parsing PLY binary...');
+  document.getElementById('empty').style.display='none';
+  prog(0);
+
+  // Update worker status UI
+  document.getElementById('ws-thread').textContent='ACTIVE';
+  document.getElementById('ws-thread').className='ws-val a';
+  document.getElementById('ws-mem').textContent=fmtB(buffer.byteLength);
+
+  const t0 = performance.now();
+
+  worker.onmessage = (e) => {
+    const d = e.data;
+    if (d.type === 'STATUS') {
+      setStatus(d.msg);
+      log(d.msg);
+    }
+    if (d.type === 'PROGRESS') {
+      prog(d.pct);
+    }
+    if (d.type === 'PARSED') {
+      const wallTime = ((performance.now()-t0)/1000).toFixed(2);
+      document.getElementById('ws-thread').textContent='IDLE';
+      document.getElementById('ws-thread').className='ws-val';
+      document.getElementById('ws-parsed').textContent=d.numSplats.toLocaleString();
+      document.getElementById('ws-parsed').className='ws-val g';
+      document.getElementById('ws-scored').textContent=d.numSplats.toLocaleString();
+      document.getElementById('ws-scored').className='ws-val g';
+
+      splatState = {
+        buffer, dataStart: d.dataStart, stride: d.stride,
+        indices: new Uint32Array(d.indices),
+        numSplats: d.numSplats, props: d.props,
+        fileName, fileSize
+      };
+
+      // Update info panel
+      const short = fileName.length>14?fileName.slice(0,12)+'…':fileName;
+      document.getElementById('ri-name').textContent  = short;
+      document.getElementById('ri-sz').textContent    = fmtB(fileSize);
+      document.getElementById('ri-cnt').textContent   = d.numSplats.toLocaleString();
+      document.getElementById('ri-props').textContent = Object.keys(d.props).length+' props';
+      document.getElementById('ri-pt').textContent    = d.parseTime+'ms (worker)';
+      document.getElementById('sc-min').textContent   = d.stats.min.toFixed(4);
+      document.getElementById('sc-max').textContent   = d.stats.max.toFixed(4);
+      document.getElementById('sc-avg').textContent   = d.stats.avg.toFixed(4);
+
+      updateLodEstimates();
+      drawHistogram(d.hist, d.stats);
+      document.getElementById('hist-wrap').style.display='block';
+
+      // Enable buttons
+      document.getElementById('bn-gen').disabled = false;
+      document.getElementById('bn-gen').style.opacity='1';
+
+      markDone(1); markDone(2);
+      setSys('ok','PARSED');
+      setStatus(`${fileName} parsed — ${d.numSplats.toLocaleString()} splats in ${wallTime}s (Web Worker)`,`<span>${Object.keys(d.props).length} properties · stride=${d.stride}B</span>`);
+      log(`Parsed: ${d.numSplats.toLocaleString()} splats · ${d.stride}B stride · ${d.parseTime}ms worker time`,'ok');
+      prog(0);
+    }
+    if (d.type === 'SLICED') {
+      handleSliced(d.results, d.props);
+    }
+    if (d.type === 'ERROR') {
+      setSys('wr','ERROR');
+      setStatus('Parse error: '+d.msg);
+      log('Error: '+d.msg,'err');
+      prog(0);
+    }
+  };
+
+  worker.postMessage({ type: 'PARSE', buffer }, [buffer]);
+}
+
+// ── GENERATE LODs ─────────────────────────────────────────────────────────────
+window.generateLods = function() {
+  if (!splatState) return;
+  setSys('ld','GENERATING');
+  setStatus('Slicing LOD levels on Web Worker...');
+  log('Generating '+lodConfigs.length+' LOD levels...');
+  prog(0,'var(--pur)');
+
+  // Clear existing
+  lodData = [];
+  if (currentPoints) { scene.remove(currentPoints); currentPoints=null; }
+
+  // Clone buffer for worker (can't reuse transferred buffer)
+  const bufCopy = splatState.buffer.slice(0);
+
+  worker.onmessage = (e) => {
+    const d = e.data;
+    if (d.type === 'PROGRESS') prog(d.pct,'var(--pur)');
+    if (d.type === 'SLICED') handleSliced(d.results);
+    if (d.type === 'ERROR') { setSys('wr','ERROR'); log('Slice error: '+d.msg,'err'); prog(0); }
+  };
+
+  worker.postMessage({
+    type: 'SLICE',
+    buffer: bufCopy,
+    dataStart: splatState.dataStart,
+    stride: splatState.stride,
+    sortedIndices: splatState.indices.buffer.slice(0),
+    numSplats: splatState.numSplats,
+    lodPcts: lodConfigs.map(l=>l.pct),
+    props: splatState.props
+  }, [bufCopy, splatState.indices.buffer.slice(0)]);
 };
 
-window.clearScene = function() {
-  if(splat){scene.remove(splat);splat.dispose?.();splat=null;}
-  files=[];
-  document.getElementById('flist').innerHTML='';
-  document.getElementById('fcount').textContent='0 file(s) loaded';
-  document.getElementById('vp-info').style.display='none';
-  document.getElementById('empty').style.display='flex';
-  setStatus('Scene cleared');
-  setSys('','SYSTEM READY');
-  log('Scene cleared');
+function handleSliced(results) {
+  lodData = [];
+
+  results.forEach((r, i) => {
+    const buf = new Uint8Array(r.buf);
+    const pts = buildPointCloud(buf, r.keep, splatState.stride, splatState.props, lodConfigs[i].color);
+    pts.visible = (i === 0);
+    scene.add(pts);
+    lodData.push({ level: i, keep: r.keep, buf: r.buf, points: pts });
+  });
+
+  currentLod = 0;
+  showLod(0);
+  buildLodTabs();
+  frameSplats();
+
+  // Enable export
+  ['rb-zip','rb-ply0','bn-zip'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.disabled=false;}
+  });
+
+  markDone(3); markDone(4);
+  setSys('ok','LODS READY');
+  setStatus(`${lodConfigs.length} LOD levels generated`,`<span>LOD0: ${lodData[0].keep.toLocaleString()} splats → LOD${lodData.length-1}: ${lodData[lodData.length-1].keep.toLocaleString()} splats</span>`);
+  log('LOD generation complete — '+lodData.map((d,i)=>`LOD${i}: ${d.keep.toLocaleString()}`).join(' · '),'ok');
+  buildLodTable();
+  prog(0);
+}
+
+function buildPointCloud(buf, count, stride, props, color) {
+  const positions = new Float32Array(count * 3);
+  const colors    = new Float32Array(count * 3);
+  const view      = new DataView(buf.buffer || buf);
+  const xOff = props.x||0, yOff = props.y||4, zOff = props.z||8;
+  const rOff = props.f_dc_0, gOff = props.f_dc_1, bOff = props.f_dc_2;
+  const SH_C0 = 0.28209479177;
+  const hexToRgb = hex => {
+    const r = parseInt(hex.slice(1,3),16)/255;
+    const g = parseInt(hex.slice(3,5),16)/255;
+    const b = parseInt(hex.slice(5,7),16)/255;
+    return [r,g,b];
+  };
+  const fallback = hexToRgb(color);
+
+  for (let i = 0; i < count; i++) {
+    const base = i * stride;
+    positions[i*3]   = view.getFloat32(base+xOff, true);
+    positions[i*3+1] = view.getFloat32(base+yOff, true);
+    positions[i*3+2] = view.getFloat32(base+zOff, true);
+
+    if (rOff !== undefined && gOff !== undefined && bOff !== undefined) {
+      const r = Math.max(0,Math.min(1, 0.5 + SH_C0 * view.getFloat32(base+rOff, true)));
+      const g = Math.max(0,Math.min(1, 0.5 + SH_C0 * view.getFloat32(base+gOff, true)));
+      const b = Math.max(0,Math.min(1, 0.5 + SH_C0 * view.getFloat32(base+bOff, true)));
+      colors[i*3]=r; colors[i*3+1]=g; colors[i*3+2]=b;
+    } else {
+      colors[i*3]=fallback[0]; colors[i*3+1]=fallback[1]; colors[i*3+2]=fallback[2];
+    }
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+  const mat = new THREE.PointsMaterial({ size: 0.015, vertexColors: true, sizeAttenuation: true });
+  return new THREE.Points(geo, mat);
+}
+
+function buildLodTabs() {
+  const wrap = document.getElementById('lod-tabs');
+  wrap.innerHTML = '';
+  wrap.style.display = 'flex';
+  lodData.forEach((d,i)=>{
+    const btn = document.createElement('button');
+    btn.className='lod-tab'+(i===0?' on':'');
+    btn.id=`ltab-${i}`;
+    btn.innerHTML=`${lodConfigs[i].name}<div class="tc">${d.keep.toLocaleString()}</div>`;
+    btn.onclick=()=>showLod(i);
+    wrap.appendChild(btn);
+  });
+}
+
+function showLod(idx) {
+  currentLod = idx;
+  lodData.forEach((d,i)=>{
+    d.points.visible=(i===idx);
+    const tab=document.getElementById(`ltab-${i}`);
+    if(tab)tab.classList.toggle('on',i===idx);
+  });
+  document.getElementById('vp-badge').style.display='block';
+  document.getElementById('vb-f').textContent    = splatState.fileName.length>14?splatState.fileName.slice(0,12)+'…':splatState.fileName;
+  document.getElementById('vb-cnt').textContent  = splatState.numSplats.toLocaleString();
+  document.getElementById('vb-lod').textContent  = lodConfigs[idx].name;
+  document.getElementById('vb-lcnt').textContent = lodData[idx].keep.toLocaleString();
+  buildLodTable();
+}
+
+function frameSplats() {
+  if (!lodData[0]) return;
+  try {
+    const box = new THREE.Box3().setFromObject(lodData[0].points);
+    if (!box.isEmpty()) {
+      const c = box.getCenter(new THREE.Vector3());
+      const s = box.getSize(new THREE.Vector3());
+      const m = Math.max(s.x,s.y,s.z);
+      controls.target.copy(c);
+      camera.position.copy(c).add(new THREE.Vector3(0,m*.2,m*1.6));
+      controls.update();
+    }
+  } catch(e){}
+}
+
+// ── HISTOGRAM ─────────────────────────────────────────────────────────────────
+function drawHistogram(hist, stats) {
+  const cv = document.getElementById('hist-canvas');
+  const W = cv.parentElement.clientWidth - 20;
+  cv.width = W; cv.height = 34;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0,0,W,34);
+  const maxH = Math.max(...hist);
+  const bw = W/hist.length;
+  hist.forEach((v,i)=>{
+    const h = Math.round((v/maxH)*30);
+    const t = i/hist.length;
+    const r = Math.round(t*124+(1-t)*0);
+    const g = Math.round(t*77+(1-t)*212);
+    const b = Math.round(t*255+(1-t)*232);
+    ctx.fillStyle=`rgb(${r},${g},${b})`;
+    ctx.fillRect(i*bw, 34-h, bw-1, h);
+  });
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function buildPlyHeader(numSplats, props) {
+  const propNames = Object.keys(props);
+  let hdr = 'ply\nformat binary_little_endian 1.0\ncomment Generated by Splat LOD Forge\n';
+  hdr += `element vertex ${numSplats}\n`;
+  propNames.forEach(p => { hdr += `property float ${p}\n`; });
+  hdr += 'end_header\n';
+  return new TextEncoder().encode(hdr);
+}
+
+function downloadPly(buf, keep, props, name) {
+  const hdr = buildPlyHeader(keep, props);
+  const data = new Uint8Array(buf);
+  const out = new Uint8Array(hdr.length + data.byteLength);
+  out.set(hdr, 0); out.set(data, hdr.length);
+  const blob = new Blob([out], { type: 'application/octet-stream' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+}
+
+window.exportLod = function(idx) {
+  if (!lodData[idx]) return;
+  const d = lodData[idx];
+  const baseName = splatState.fileName.replace('.ply','');
+  downloadPly(d.buf, d.keep, splatState.props, `${baseName}_LOD${idx}.ply`);
+  log(`Exported LOD${idx}: ${d.keep.toLocaleString()} splats`,'ok');
 };
 
-document.getElementById('file-input').addEventListener('change',e=>{
-  const f=e.target.files[0]; if(!f) return;
-  const ext=f.name.split('.').pop().toLowerCase();
-  loadSplat(URL.createObjectURL(f),f.name,ext,f.size);
+window.exportZip = async function() {
+  if (!lodData.length) return;
+  setSys('ld','EXPORTING');
+  setStatus('Packing LODs into ZIP...');
+  log('Building ZIP archive...');
+
+  // Simple ZIP builder (no external lib needed for basic zip)
+  // We'll create individual PLY files and pack manually using JSZip CDN
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+  document.head.appendChild(script);
+  script.onload = async () => {
+    const zip = new JSZip();
+    const baseName = splatState.fileName.replace('.ply','');
+    lodData.forEach((d,i)=>{
+      const hdr = buildPlyHeader(d.keep, splatState.props);
+      const data = new Uint8Array(d.buf);
+      const out = new Uint8Array(hdr.length+data.byteLength);
+      out.set(hdr,0); out.set(data,hdr.length);
+      zip.file(`${baseName}_LOD${i}_${d.keep}splats.ply`, out);
+    });
+    const blob = await zip.generateAsync({ type:'blob', compression:'DEFLATE', compressionOptions:{level:6} });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${baseName}_LOD_chain.zip`;
+    a.click();
+    setSys('ok','EXPORTED');
+    log(`ZIP exported: ${lodData.length} LOD levels · ${fmtB(blob.size)}`,'ok');
+    setStatus('ZIP exported successfully');
+  };
+};
+
+window.screenshot = function() {
+  renderer.render(scene,camera);
+  canvas.toBlob(b=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download=`splat_lod_forge_${Date.now()}.png`;
+    a.click();
+    log('Screenshot saved','ok');
+  });
+};
+
+// ── FILE IMPORT ───────────────────────────────────────────────────────────────
+document.getElementById('file-input').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f)return;
+  if(!f.name.endsWith('.ply')){log('Only .ply files supported','err');return;}
+  const reader=new FileReader();
+  reader.onload=ev=>parsePly(ev.target.result,f.name,f.size);
+  reader.readAsArrayBuffer(f);
   e.target.value='';
 });
 
+// ── DRAG & DROP ───────────────────────────────────────────────────────────────
 let dc=0;
 document.addEventListener('dragenter',e=>{e.preventDefault();dc++;document.getElementById('dropov').classList.add('sh');});
 document.addEventListener('dragleave',()=>{dc--;if(dc<=0){dc=0;document.getElementById('dropov').classList.remove('sh');}});
@@ -448,45 +933,73 @@ document.addEventListener('dragover',e=>e.preventDefault());
 document.addEventListener('drop',e=>{
   e.preventDefault();dc=0;document.getElementById('dropov').classList.remove('sh');
   const f=e.dataTransfer.files[0];if(!f)return;
-  const ext=f.name.split('.').pop().toLowerCase();
-  if(!['ply','splat','spz','ksplat'].includes(ext)){log(`Unsupported: .${ext}`,'err');return;}
-  loadSplat(URL.createObjectURL(f),f.name,ext,f.size);
+  if(!f.name.endsWith('.ply')){log('Only .ply files supported','err');return;}
+  const r=new FileReader();
+  r.onload=ev=>parsePly(ev.target.result,f.name,f.size);
+  r.readAsArrayBuffer(f);
 });
 
-document.getElementById('s-al').addEventListener('input',function(){ document.getElementById('v-al').textContent=this.value; if(splat&&splat.alphaThreshold!==undefined)splat.alphaThreshold=+this.value; });
-document.getElementById('s-sc').addEventListener('input',function(){ document.getElementById('v-sc').textContent=(+this.value).toFixed(2); if(splat)splat.scale.setScalar(+this.value); });
-document.getElementById('s-si').addEventListener('input',function(){ document.getElementById('v-si').textContent=(+this.value).toFixed(1); if(splat&&splat.splatScale!==undefined)splat.splatScale=+this.value; });
+// ── DEMO ──────────────────────────────────────────────────────────────────────
+window.loadDemo = function() {
+  log('Demo: fetching butterfly.spz — note: demo uses SPZ, for full LOD use a .ply file','wr');
+  log('Tip: Download a free .ply from superspl.at or polycam and drop it here','inf');
+  setStatus('Demo — drop a real .ply file for full LOD generation. Free samples at superspl.at');
+};
 
-window.toggleGrid   = function(btn){ gridOn=!gridOn; grid.visible=gridOn; btn?.classList.toggle('on',gridOn); document.getElementById('tg-grd')?.classList.toggle('on',gridOn); };
-window.toggleAxes   = function(btn){ axesOn=!axesOn; axes.visible=axesOn; btn?.classList.toggle('on',axesOn); document.getElementById('tg-axs')?.classList.toggle('on',axesOn); };
-window.toggleRotate = function(btn){ autoRot=!autoRot; controls.autoRotate=autoRot; btn?.classList.toggle('on',autoRot); document.getElementById('tg-rot')?.classList.toggle('on',autoRot); };
-window.resetCamera  = function(){ camera.position.set(0,1,5);controls.target.set(0,0,0);controls.update();if(splat){try{const b=new THREE.Box3().setFromObject(splat);if(!b.isEmpty()){const c=b.getCenter(new THREE.Vector3()),s=b.getSize(new THREE.Vector3()),m=Math.max(s.x,s.y,s.z);controls.target.copy(c);camera.position.copy(c).add(new THREE.Vector3(0,m*.3,m*1.8));controls.update();}}catch(e){}} };
-window.setTopView   = function(){ const t=controls.target.clone();camera.position.set(t.x,t.y+8,t.z+.001);controls.update(); };
-window.setFrontView = function(){ const t=controls.target.clone();camera.position.set(t.x,t.y,t.z+8);controls.update(); };
-window.takeScreenshot = function(){ renderer.render(scene,camera); canvas.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`splat_forge_${Date.now()}.png`;a.click();log('Screenshot saved','ok');}); };
-window.saveSession  = function(){ log('Session save — coming soon'); };
-window.loadSession  = function(){ log('Session load — coming soon'); };
-window.activateStep = function(n){ for(let i=1;i<=4;i++)document.getElementById('step'+i).classList.remove('on'); document.getElementById('step'+n).classList.add('on'); };
-function markDone(n){ document.getElementById('step'+n).classList.add('done'); document.getElementById('sn'+n).textContent='✓'; }
+// ── CLEAR ─────────────────────────────────────────────────────────────────────
+window.clearAll = function() {
+  lodData.forEach(d=>scene.remove(d.points));
+  lodData=[];
+  if(currentPoints){scene.remove(currentPoints);currentPoints=null;}
+  splatState=null;
+  document.getElementById('empty').style.display='flex';
+  document.getElementById('vp-badge').style.display='none';
+  document.getElementById('lod-tabs').style.display='none';
+  document.getElementById('hist-wrap').style.display='none';
+  ['bn-gen','bn-zip','rb-zip','rb-ply0'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=true;});
+  setSys('','READY');
+  setStatus('Scene cleared');
+  log('Scene cleared');
+};
 
-function animate() {
+// ── TOGGLES ───────────────────────────────────────────────────────────────────
+window.togGrid = function(btn){gridOn=!gridOn;gridH.visible=gridOn;btn.classList.toggle('on',gridOn);};
+window.togRot  = function(btn){autoRot=!autoRot;controls.autoRotate=autoRot;btn.classList.toggle('on',autoRot);};
+window.resetCam = function(){
+  camera.position.set(0,0,3);controls.target.set(0,0,0);controls.update();
+  if(lodData[0])frameSplats();
+};
+
+// ── STEP HELPERS ──────────────────────────────────────────────────────────────
+function markDone(n){
+  document.getElementById('step'+n).classList.add('done');
+  document.getElementById('sn'+n).textContent='✓';
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function fmtB(b){return b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB';}
+
+// ── FPS ───────────────────────────────────────────────────────────────────────
+let frames=0, fpsTs=performance.now();
+function animate(){
   requestAnimationFrame(animate);
   controls.update();
   renderer.render(scene,camera);
   frames++;
   const now=performance.now();
   if(now-fpsTs>500){
-    fps=Math.round(frames/((now-fpsTs)/1000));
-    frames=0;fpsTs=now;
-    document.getElementById('fps-n').textContent=fps;
+    document.getElementById('fps-n').textContent=Math.round(frames/((now-fpsTs)/1000));
     document.getElementById('cx').textContent=camera.position.x.toFixed(2);
     document.getElementById('cy').textContent=camera.position.y.toFixed(2);
     document.getElementById('cz').textContent=camera.position.z.toFixed(2);
+    frames=0;fpsTs=now;
   }
 }
 
-log('Splat Forge initialized · Spark 3DGS renderer ready','ok');
-log('Supported: .ply · .splat · .spz · .ksplat');
+// ── INIT ──────────────────────────────────────────────────────────────────────
+log('Splat LOD Forge initialized · Web Worker thread ready','ok');
+log('PLY binary parser · opacity×scale scoring · LOD chain export','inf');
+log('Drop a .ply Gaussian Splat file — free samples at superspl.at','inf');
 animate();
 </script>
 </body>
