@@ -9,7 +9,7 @@
 
 > Drop a `.ply`, `.splat`, `.spz`, or `.ksplat` file — preview it instantly in your browser. No installation. No server. No Blender.
 
-![Splat Forge Screenshot](screenshot.png)
+![Splat Forge Screenshot](Screenshot_20260406_083933_Chrome.jpg)
 
 ---
 
